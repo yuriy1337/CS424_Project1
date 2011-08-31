@@ -1,0 +1,79 @@
+ll be an individual project to give people practice with writing an application in processing and get everyone ready to contribute to the group projects to come. In this project everyone will learn how to get data into processing, how to write an interactive processing application, and how to create an effective user interface for viewing and analyzing this data. This will give everyone a common basis for communication In the later group projects where people will most likely specialize in different tasks.
+
+The project will take a look at termperature data collected from various rooms in evl over the last six years. You job is to create an interactive visualization and analysis tool to help the user better understand what affects the temperature in evl. This tool will allow the user to decide things such as: how warm to dress for a given day and room, where to place new equipment so rooms and the equipment don't get too hot, how to change the settings for the university heating and cooling, etc.
+
+
+For the last six years we have used a one-wire system to monitor temperatures in the lab. Every minute new temperature data is collected and displayed. Each hour the current temperatures are saved to a text file. At this point the data comes to 15 MB.
+
+The data is available at www.evl.uic.edu/aej/424/11p1data/history.txt.zip
+
+In this case the data is already pre-processed to be an appropriate size and in an easily readable form. That won't hold true for the later assignments. 
+
+Each line of the file looks like: May/04/2008 10:00 PM FF00080057FB1810  67
+
+The first element is the date, the second is the hour and minute, the third is AM or PM, the fourth is the sensor ID, and the fifth is the temperature in degrees Fahrenheit.
+
+The temperature sensorIDs can be correlated to rooms
+3B00080058124B10 - meeting room    - 1
+73000800B1D9BD10 - main lab        - 2
+DB000800B1E8E710 - machine room    - 3
+F2000800B1D88510 - lounge          - 4
+35000800B1EC2510 - prototype space - 5
+DB00080041634E10 - classroom       - 6
+FF00080057FB1810 - office space    - 7
+
+Here is a small map showing where the various rooms are geographically. While this project will primarily rely on graphs to show the data, you will very likely need to show some kind of simplified map as an informational graphic to tell the user which room is which. 
+
+
+There is a non-annotated version of the map at www.evl.uic.edu/aej/424/11p1data/evl_2nd_floor.jpg that you might help.
+
+in general the data is collected on each hour (eg 10:00) but if the program was offline at that time it might be at a different minute, or there might be several in the same hour if the program is stopped and started again. There may also be holes in the data due to power failures or program crashes.
+
+While the data files contain a few more days, for this project we will focus on the days from aug 1 2005 through jul 31 2011
+
+You should start by looking at data itself and do some simple plots and statistics in your favourite spreadsheet / plotting program.  This will give you an idea of the range of the data and what data is missing. If you haven't used shell scripts before to parse data then you should become acquainted with them. grrep, awk, sed and their friends will save you a lot of time. 
+
+What kinds of patterns are visible? Your job is to help the user look beyond the cyclical patterns for longer term trends and aberrations that are hiding there, and see what changes in the real world could have caused them. Some of these changes are related to how hot a summer was or how cold a winter was, others are related to human behavior - when are people coming in to the lab and turning on machines? when does the university turn on the heating or the air conditioning?
+
+The goal here is to create an interactive visualization tool to aid in your analysis and to back up any conclusions you draw. 
+
+You will very likely need to relate this data to other data sources such as the schedule of classes, outdoor Chicago temperatures, calendars.Project 1 will be an individual project to give people practice with writing an application in processing and get everyone ready to contribute to the group projects to come. In this project everyone will learn how to get data into processing, how to write an interactive processing application, and how to create an effective user interface for viewing and analyzing this data. This will give everyone a common basis for communication In the later group projects where people will most likely specialize in different tasks.
+
+The project will take a look at termperature data collected from various rooms in evl over the last six years. You job is to create an interactive visualization and analysis tool to help the user better understand what affects the temperature in evl. This tool will allow the user to decide things such as: how warm to dress for a given day and room, where to place new equipment so rooms and the equipment don't get too hot, how to change the settings for the university heating and cooling, etc.
+
+
+For the last six years we have used a one-wire system to monitor temperatures in the lab. Every minute new temperature data is collected and displayed. Each hour the current temperatures are saved to a text file. At this point the data comes to 15 MB.
+
+The data is available at www.evl.uic.edu/aej/424/11p1data/history.txt.zip
+
+In this case the data is already pre-processed to be an appropriate size and in an easily readable form. That won't hold true for the later assignments. 
+
+Each line of the file looks like: May/04/2008 10:00 PM FF00080057FB1810  67
+
+The first element is the date, the second is the hour and minute, the third is AM or PM, the fourth is the sensor ID, and the fifth is the temperature in degrees Fahrenheit.
+
+The temperature sensorIDs can be correlated to rooms
+3B00080058124B10 - meeting room    - 1
+73000800B1D9BD10 - main lab        - 2
+DB000800B1E8E710 - machine room    - 3
+F2000800B1D88510 - lounge          - 4
+35000800B1EC2510 - prototype space - 5
+DB00080041634E10 - classroom       - 6
+FF00080057FB1810 - office space    - 7
+
+Here is a small map showing where the various rooms are geographically. While this project will primarily rely on graphs to show the data, you will very likely need to show some kind of simplified map as an informational graphic to tell the user which room is which. 
+
+
+There is a non-annotated version of the map at www.evl.uic.edu/aej/424/11p1data/evl_2nd_floor.jpg that you might help.
+
+in general the data is collected on each hour (eg 10:00) but if the program was offline at that time it might be at a different minute, or there might be several in the same hour if the program is stopped and started again. There may also be holes in the data due to power failures or program crashes.
+
+While the data files contain a few more days, for this project we will focus on the days from aug 1 2005 through jul 31 2011
+
+You should start by looking at data itself and do some simple plots and statistics in your favourite spreadsheet / plotting program.  This will give you an idea of the range of the data and what data is missing. If you haven't used shell scripts before to parse data then you should become acquainted with them. grrep, awk, sed and their friends will save you a lot of time. 
+
+What kinds of patterns are visible? Your job is to help the user look beyond the cyclical patterns for longer term trends and aberrations that are hiding there, and see what changes in the real world could have caused them. Some of these changes are related to how hot a summer was or how cold a winter was, others are related to human behavior - when are people coming in to the lab and turning on machines? when does the university turn on the heating or the air conditioning?
+
+The goal here is to create an interactive visualization tool to aid in your analysis and to back up any conclusions you draw. 
+
+You will very likely need to relate this data to other data sources such as the schedule of classes, outdoor Chicago temperatures, calendars.
