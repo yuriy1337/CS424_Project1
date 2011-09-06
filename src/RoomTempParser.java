@@ -12,68 +12,21 @@ import java.util.StringTokenizer;
 
 public class RoomTempParser {
     
-    private boolean DEBUG = true; 
-    Connection conn = null;
-    public boolean connectToDB() {
-        return connectToDB("");
-    }
+    private boolean DEBUG = true;     
     
-    public boolean connectToDB(String db) {
-        try {
-            //Class.forName("org.sqlite.JDBC");
-            Class.forName("com.mysql.jdbc.Driver");
-            conn = DriverManager.getConnection("jdbc:mysql://localhost/"+db, "user", "password");
-            return true;
-        } catch (Exception e) {
-            if(DEBUG){
-                System.out.println(e);
-                e.printStackTrace();
-            }
-            return false;
-        }
-    }
-    
-    public void createTables(){
-        try{
-            Statement stat = conn.createStatement();
-            stat.executeUpdate("create database if not exists roomtemps;");
-            connectToDB("roomtemps");
-            stat = conn.createStatement();
-            stat.executeUpdate("drop table if exists sensors;");
-            stat.executeUpdate("create table sensors (id INT NOT NULL AUTO_INCREMENT, sensor VARCHAR(255), PRIMARY KEY(id));");
-            stat.executeUpdate("drop table if exists hourly_temperatures;");
-            stat.executeUpdate("create table hourly_temperatures (id INT NOT NULL AUTO_INCREMENT, date_time DATETIME NOT NULL, sensor_id INT NOT NULL, temp VARCHAR(255) NOT NULL, PRIMARY KEY(id));");
-            /*stat.executeUpdate("drop table if exists daily_temperatures;");
-            stat.executeUpdate("create table daily_temperatures (id, date, sensor_id, temp);");
-            stat.executeUpdate("drop table if exists monthly_temperatures;");
-            stat.executeUpdate("create table monthly_temperatures (id, month, sensor_id, temp);");
-            stat.executeUpdate("drop table if exists yearly_temperatures;");
-            stat.executeUpdate("create table yearly_temperatures (id, year, sensor_id, temp);");*/
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-    
-    public void closeConnToDB(){
-        try {
-            conn.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
+    DBConnector db = new DBConnector();
     
     public void parseData(String filename){
-        connectToDB();
-        createTables();
+        db.connectToDB();
+        db.createTables();
         
         //variables
         String date = "", sensor = "", token = "";
         int temp = 0, row = 0, col = 0, id = 0;
         ArrayList<String> sensors = new ArrayList<String>();
-        ArrayList<Integer> daily_avg = new ArrayList<Integer>(Arrays.asList(0,0,0,0,0,0));
-        ArrayList<Integer> monthly_avg = new ArrayList<Integer>(Arrays.asList(0,0,0,0,0,0));
-        ArrayList<Integer> yearly_avg = new ArrayList<Integer>(Arrays.asList(0,0,0,0,0,0));
+        //ArrayList<Integer> daily_avg = new ArrayList<Integer>(Arrays.asList(0,0,0,0,0,0));
+        //ArrayList<Integer> monthly_avg = new ArrayList<Integer>(Arrays.asList(0,0,0,0,0,0));
+        //ArrayList<Integer> yearly_avg = new ArrayList<Integer>(Arrays.asList(0,0,0,0,0,0));
         //Date d = new Date();
         //Date pd = new Date(); //previous date
         
@@ -107,29 +60,32 @@ public class RoomTempParser {
                 }
                 if (!sensors.contains(sensor)) {
                     sensors.add(sensor);
-                    PreparedStatement prep = conn.prepareStatement("insert into sensors(sensor) values (?);");
+                    PreparedStatement prep = db.getConnection().prepareStatement("insert into sensors(sensor) values (?);");
                     prep.setString(1, sensor);
                     prep.executeUpdate();
+                    prep.close();
                 }
-                int index = sensors.indexOf(sensor);
-                //daily_avg.set(index, daily_avg.get(index)+temp);
                 date = date.trim();
                 Date parsed_date = ts.parse(date);
                 String sql_date_string = sql_date.format(parsed_date);
 
-                PreparedStatement prep = conn.prepareStatement("SELECT id FROM sensors WHERE sensor = (?);");
+                PreparedStatement prep = db.getConnection().prepareStatement("SELECT id FROM sensors WHERE sensor = (?);");
                 prep.setString(1, sensor);
                 ResultSet r = prep.executeQuery();
                 while ( r.next() ) { 
                     // Read the next item
                      id = r.getInt("id");
                  }
+                prep.close();
+                r.close();
                 
-                prep = conn.prepareStatement("insert into hourly_temperatures(date_time, sensor_id, temp) values (?, ?, ?);");
+                prep = db.getConnection().prepareStatement("insert into hourly_temperatures(date_time, sensor_id, temp) values (?, ?, ?);");
                 prep.setString(1, sql_date_string);
                 prep.setInt(2, id);
                 prep.setInt(3, temp);
                 prep.executeUpdate();
+                prep.close();
+                if(row % 1000 ==0)
                 System.out.println(date + " " + sensor + " " + temp);
                 row++;
                 date = "";
@@ -143,6 +99,6 @@ public class RoomTempParser {
             if(DEBUG)
                 System.out.println(e);
         }
-        closeConnToDB();
+        db.closeConnToDB();
     }
 }
