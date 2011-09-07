@@ -14,10 +14,11 @@ public class RoomTemps extends PApplet {
     
     DBConnector db = new DBConnector();
     XYChart lineChart;
+    LineChart l;
     
     public void setup()
     {
-      size(500,200);
+      /*size(500,200);
       smooth(); 
       noLoop();
       
@@ -56,12 +57,15 @@ public class RoomTemps extends PApplet {
       // Symbol colours
       lineChart.setPointColour(color(180,50,50,100));
       lineChart.setPointSize(5);
-      lineChart.setLineWidth(2);
+      lineChart.setLineWidth(2);*/
+        size(720, 405);
+        ArrayList<ArrayList<Float>> arr = db.getAvg(DBConnector.AvgType.year);
+        l = new LineChart(this, arr);
     }
 
     public void draw()
     {
-      background(255);
+      /*background(255);
       textSize(9);
       lineChart.draw(15,15,width-30,height-30);
       
@@ -71,13 +75,24 @@ public class RoomTemps extends PApplet {
       text("Income per person, United Kingdom", 70,30);
       textSize(11);
       text("Gross domestic product measured in inflation-corrected $US", 70,45);
+      */
+        l.drawChart();
+        if(!l.isDataLoaded){
+            l.loadData();
+            l.isDataLoaded = true;
+        }
+        
     }
     
-    /*public static void main(String args[]) {
+    public void mouseClicked() {
+        l.loadData();
+    }
+    
+    public static void main(String args[]) {
         RoomTempParser rm = new RoomTempParser();
         
         //rm.parseData("C:\\Users\\Yuriy\\Downloads\\history.txt\\history.txt");
         PApplet.main(new String[] { "--present", "RoomTemps" });
-      }*/
+      }
 
 }
