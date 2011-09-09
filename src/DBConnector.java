@@ -104,5 +104,42 @@ public class DBConnector {
         return null;
 
     }
+    
+    public ArrayList<ArrayList<Float>> getAvgBySensor(AvgType t, int sensor) {
+        connectToDB(dbName);
+        ArrayList<ArrayList<Float>> arr = new ArrayList<ArrayList<Float>>();
+        arr.add(new ArrayList<Float>());
+        arr.add(new ArrayList<Float>());
+        SimpleDateFormat ts= new SimpleDateFormat();
+        switch(t){
+        case year:
+            ts.applyPattern("yyyy");
+            break;
+        case month:
+            ts.applyPattern("MM");
+            break;
+        }
+        try {
+            PreparedStatement prep;
+            //SELECT date_time, AVG(temp) as avg FROM roomtemps.hourly_temperatures WHERE sensor_id = 1 GROUP BY sensor_id, year(date_time);
+            prep = conn.prepareStatement("SELECT date_time, AVG(temp) as avg FROM hourly_temperatures WHERE sensor_id =(?) GROUP BY " + t + "(date_time);");
+            prep.setInt(1, sensor);
+            ResultSet r = prep.executeQuery();
+            while (r.next()) {
+                ((ArrayList<Float>) arr.get(0)).add(Float.valueOf(ts.format(r.getDate(1))));
+                ((ArrayList<Float>) arr.get(1)).add(r.getFloat(2));
+            }
+            prep.close();
+            r.close();
+            closeConnToDB();
+            return arr;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        closeConnToDB();
+        return null;
+
+    }
 
 }

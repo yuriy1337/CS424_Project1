@@ -6,7 +6,7 @@ import processing.core.PApplet;
 import processing.core.PConstants;
 import processing.core.PFont;
 
-public class LineChart {
+public class Line{
 
     private PApplet parent;
 
@@ -16,43 +16,31 @@ public class LineChart {
 
     private float plotX1, plotY1;
     private float plotX2, plotY2;
-    private float labelX, labelY;
+    
+    private int yearMin, yearMax;
+
 
     private int rowCount;
-    private int columnCount;
-    private int currentColumn = 0;
-
-    private int yearMin, yearMax;
-    private int[] years;
-
-    // these have to be renamed
-    private int yearInterval = 1;
-    private int volumeInterval = 1;
-    private int volumeIntervalMinor = 1;
-
-    private float[] tabLeft, tabRight;
-    private float tabTop, tabBottom;
-    private float tabPad = 10;
 
     private Integrator[] interpolatorsX, interpolatorsY;
 
-    private PFont plotFont;
-    
-    public boolean isDataLoaded = false;
-
-    public LineChart(PApplet p, ArrayList d) {
+    public Line(PApplet p, ArrayList d, int interval, float pX1, float pX2, float pY1, float pY2) {
         parent = p;
-        data = d; // shallow copy, it is okay here?
+        data = d;
+        plotX1 = pX1;
+        plotX2 = pX2;
+        plotY1 = pY1;
+        plotY2 = pY2;
 
         dataMin = PApplet.floor(Utils.getArrayListMin((ArrayList<Float>) data
-                .get(1)) / volumeInterval)
-                * volumeInterval;
+                .get(1)) / interval)
+                * interval;
         dataMax = PApplet.ceil(Utils.getArrayListMax((ArrayList<Float>) data
-                .get(1)) / volumeInterval)
-                * volumeInterval;
-
-        //rowCount = ((ArrayList<Float>) data.get(0)).size();
-        columnCount = data.size();
+                .get(1)) / interval)
+                * interval;
+        
+        yearMin = getYearMin();
+        yearMax = getYearMax();
 
         //interpolatorsY = new Integrator[rowCount];
         /*
@@ -69,115 +57,18 @@ public class LineChart {
          * (float) 0.1; // Set lower than the default }
          */
 
-        years = Utils.floatArrToIntArr((ArrayList<Float>) data.get(0));
-        yearMin = Math.round(Utils.getArrayListMin((ArrayList<Float>) data
-                .get(0)));
-        yearMax = Math.round(Utils.getArrayListMax((ArrayList<Float>) data
-                .get(0)));
-
-        plotX1 = 120;
-        plotX2 = parent.width - 80;
-        labelX = 50;
-        plotY1 = 60;
-        plotY2 = parent.height - 70;
-        labelY = parent.height - 25;
-
-        plotFont = parent.createFont("SansSerif", 20);
-        parent.textFont(plotFont);
-
-        parent.smooth();
-
     }
 
-    void drawChart() {
-        parent.background(224);
-
-        // Show the plot area as a white box
-        parent.fill(255);
-        parent.rectMode(PApplet.CORNERS);
-        parent.noStroke();
-        parent.rect(plotX1, plotY1, plotX2, plotY2);
-
-        drawAxisLabels();
-
+    public void updateInterpolators(){
         for (int row = 0; row < rowCount; row++) {
             if (interpolatorsX != null && interpolatorsY != null) {
                 interpolatorsY[row].update();
                 interpolatorsX[row].update();
             }
         }
-
-        drawYearLabels();
-        drawVolumeLabels();
-
-        // parent.noStroke();
-        // parent.fill(0xFF5679C1); //with eclipse need to add the 'FF' in the
-        // front
-        parent.stroke(0xFF5679C1);
-        parent.strokeWeight(5);
-        parent.noFill();
-        drawDataArea(currentColumn);
     }
 
-    void drawAxisLabels() {
-        parent.fill(0);
-        parent.textSize(13);
-        parent.textLeading(15);
-
-        parent.textAlign(PConstants.CENTER, PConstants.CENTER);
-        parent.text("Temperature\nin Farenheit", labelX, (plotY1 + plotY2) / 2);
-        parent.textAlign(PConstants.CENTER);
-        parent.text("Year", (plotX1 + plotX2) / 2, labelY);
-    }
-
-    void drawYearLabels() {
-        parent.fill(0);
-        parent.textSize(10);
-        parent.textAlign(PConstants.CENTER);
-
-        // Use thin, gray lines to draw the grid
-        parent.stroke(224);
-        parent.strokeWeight(1);
-
-        for (int row = 0; row < rowCount; row++) {
-             if (years[row] % yearInterval == 0) {
-                float x = PApplet.map(years[row], yearMin, yearMax, plotX1,
-                        plotX2);
-                parent.text(years[row], x, plotY2 + parent.textAscent() + 10);
-                parent.line(x, plotY1, x, plotY2);
-            }
-        }
-    }
-
-    void drawVolumeLabels() {
-        parent.fill(0);
-        parent.textSize(10);
-        parent.textAlign(PConstants.RIGHT);
-
-        parent.stroke(128);
-        parent.strokeWeight(1);
-
-        for (float v = dataMin; v <= dataMax; v += volumeIntervalMinor) {
-            if (v % volumeIntervalMinor == 0) { // If a tick mark
-                float y = PApplet.map(v, dataMin, dataMax, plotY2, plotY1);
-                if (v % volumeInterval == 0) { // If a major tick mark
-                    float textOffset = parent.textAscent() / 2; // Center
-                                                                // vertically
-                    if (v == dataMin) {
-                        textOffset = 0; // Align by the bottom
-                    } else if (v == dataMax) {
-                        textOffset = parent.textAscent(); // Align by the top
-                    }
-                    parent.text(PApplet.floor(v), plotX1 - 10, y + textOffset);
-                    parent.line(plotX1 - 4, y, plotX1, y); // Draw major tick
-                } else {
-                    // parent.line(plotX1 - 2, y, plotX1, y); // Draw minor tick
-                }
-            }
-        }
-    }
-
-    void drawDataArea(int col) {
+    void drawDataArea(int yearMin, int yearMax) {
         parent.beginShape();
         for (int row = 0; row < rowCount; row++) {
             // TODO FIXME
@@ -256,6 +147,15 @@ public class LineChart {
         }
     }
     
-    void onMouseOver(){
+    public int getYearMin(){
+        return Math.round(Utils.getArrayListMin((ArrayList<Float>) data
+                .get(0)));
+
     }
+    
+    public int getYearMax(){
+        return Math.round(Utils.getArrayListMax((ArrayList<Float>) data
+                .get(0)));
+    }
+    
 }

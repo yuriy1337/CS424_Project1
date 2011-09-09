@@ -10,7 +10,7 @@ public class RoomTemps extends PApplet {
     
     DBConnector db = new DBConnector();
     XYChart lineChart;
-    LineChart l;
+    LineGraph l;
     
     public void setup()
     {
@@ -56,7 +56,11 @@ public class RoomTemps extends PApplet {
       lineChart.setLineWidth(2);*/
         size(720, 405);
         ArrayList<ArrayList<Float>> arr = db.getAvg(DBConnector.AvgType.year);
-        l = new LineChart(this, arr);
+        ArrayList<ArrayList<Float>> arr1 = db.getAvgBySensor(DBConnector.AvgType.year, 1);
+        ArrayList<ArrayList<Float>> arr2 = db.getAvgBySensor(DBConnector.AvgType.year, 2);
+        l = new LineGraph(this);
+        //l.addLine(arr1);
+        l.addLine(arr);
     }
 
     public void draw()
@@ -73,10 +77,8 @@ public class RoomTemps extends PApplet {
       text("Gross domestic product measured in inflation-corrected $US", 70,45);
       */
         l.drawChart();
-        if(!l.isDataLoaded){
-            l.isDataLoaded = true;
-            l.loadData();
-            
+        if(!l.isDataLoaded()){
+            l.loadLineData();
         }
         
     }
