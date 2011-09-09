@@ -17,7 +17,10 @@ public class RoomTempParser {
     DBConnector db = new DBConnector();
     
     public void parseData(String filename){
-        db.connectToDB();
+        if(DBConnector.localDB)
+            db.connectToDB();
+        else
+            db.connectToDB("a1124959_rt");
         db.createTables();
         
         //variables

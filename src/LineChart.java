@@ -140,7 +140,7 @@ public class LineChart {
         parent.strokeWeight(1);
 
         for (int row = 0; row < rowCount; row++) {
-            if (years[row] % yearInterval == 0) {
+             if (years[row] % yearInterval == 0) {
                 float x = PApplet.map(years[row], yearMin, yearMax, plotX1,
                         plotX2);
                 parent.text(years[row], x, plotY2 + parent.textAscent() + 10);
@@ -254,5 +254,8 @@ public class LineChart {
             float temp = (Float) ((ArrayList<Float>) (data.get(1))).get(row);
             addPoint(year, temp);
         }
+    }
+    
+    void onMouseOver(){
     }
 }

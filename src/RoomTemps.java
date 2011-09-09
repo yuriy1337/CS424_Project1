@@ -1,9 +1,5 @@
-import java.sql.Array;
-import java.sql.Date;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+
 import java.util.ArrayList;
-import java.util.Calendar;
 
 import processing.core.*;
 import org.gicentre.*;
@@ -78,21 +74,22 @@ public class RoomTemps extends PApplet {
       */
         l.drawChart();
         if(!l.isDataLoaded){
-            l.loadData();
             l.isDataLoaded = true;
+            l.loadData();
+            
         }
         
     }
     
     public void mouseClicked() {
-        l.loadData();
+        //l.loadData();
     }
     
     public static void main(String args[]) {
         RoomTempParser rm = new RoomTempParser();
         
         //rm.parseData("C:\\Users\\Yuriy\\Downloads\\history.txt\\history.txt");
-        PApplet.main(new String[] { "--present", "RoomTemps" });
+        //PApplet.main(new String[] { "--present", "RoomTemps" });
       }
 
 }
