@@ -40,6 +40,36 @@ public class Image {
 	
 	public void centerVertically(){
 		y = parent.height/2 - img.height/2;
+		System.out.println("setting y to "+ y);
+	}
+	
+	public int getX(){
+		return x;
+	}
+	
+	public int getY(){
+		return y;
+	}
+	
+	public int getWidth(){
+		return img.width;
+	}
+	
+	public int getHeight(){
+		return img.height;
+	}
+	
+	public void setX(int x){
+		this.x = x;
+	}
+	
+	public void setY(int y){
+		this.y = y;
+	}
+	
+	public void setXY(int x, int y){
+		setX(x);
+		setY(y);
 	}
 	
 	void draw() {
