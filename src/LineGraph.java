@@ -34,17 +34,21 @@ public class LineGraph {
     
     boolean updateYRanges = false;
     
+    Selector selec;
+    
     public LineGraph(PApplet p){
         parent = p;
         
         lines = new ArrayList<Line>();
         
         plotX1 = 420;
-        plotX2 = parent.width - 80;
-        labelX = 50;
+        plotX2 = parent.width - 20;
+        labelX = 375;
         plotY1 = 60;
         plotY2 = parent.height - 70;
         labelY = parent.height - 25;
+        
+        selec = new Selector(p, plotX1, plotX2, plotY1, plotY2);
 
         plotFont = parent.createFont("SansSerif", 20);
         parent.textFont(plotFont);
@@ -136,6 +140,9 @@ public class LineGraph {
         drawLines();
         
         drawVolumeLabels();
+        
+        if(lines.size() > 0)
+        	selec.draw();
     }
 
     private void drawAxisLabels() {
@@ -144,7 +151,7 @@ public class LineGraph {
         parent.textLeading(15);
 
         parent.textAlign(PConstants.CENTER, PConstants.CENTER);
-        parent.text("Temperature\nin Farenheit", labelX, (plotY1 + plotY2) / 2);
+        parent.text("Temp\nin "+localization, labelX, (plotY1 + plotY2) / 2);
         parent.textAlign(PConstants.CENTER);
         parent.text("Year", (plotX1 + plotX2) / 2, labelY);
     }
