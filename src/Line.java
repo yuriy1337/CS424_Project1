@@ -19,12 +19,13 @@ public class Line{
     
     private int yearMin, yearMax;
 
-
+    private int roomNumber;
+    
     private int rowCount;
 
     private Integrator[] interpolatorsX, interpolatorsY;
 
-    public Line(PApplet p, ArrayList d, int interval, float pX1, float pX2, float pY1, float pY2) {
+    public Line(PApplet p, ArrayList d, int interval, float pX1, float pX2, float pY1, float pY2, int roomNum) {
         parent = p;
         data = d;
         plotX1 = pX1;
@@ -32,6 +33,8 @@ public class Line{
         plotY1 = pY1;
         plotY2 = pY2;
 
+        roomNumber = roomNum;
+        
         dataMin = PApplet.floor(Utils.getArrayListMin((ArrayList<Float>) data
                 .get(1)) / interval)
                 * interval;
@@ -69,6 +72,9 @@ public class Line{
     }
 
     void drawDataArea(int yearMin, int yearMax) {
+    	parent.stroke(GUI.getRoomColor(roomNumber));
+        parent.strokeWeight(5);
+        parent.noFill();
         parent.beginShape();
         for (int row = 0; row < rowCount; row++) {
             // TODO FIXME
@@ -168,5 +174,14 @@ public class Line{
         return Math.round(Utils.getArrayListMax((ArrayList<Float>) data
                 .get(1)));
 
+    }
+    
+    public int getRoomNumber(){
+    	return roomNumber;
+    }
+    
+    public ArrayList getData(){
+    	//this is not safe
+    	return data;
     }
 }

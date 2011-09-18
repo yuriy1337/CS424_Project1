@@ -15,7 +15,7 @@ public class DBConnector {
     private Connection conn = null;
     private String dbName = "roomtemps";
     
-    public enum AvgType {
+    public static enum AvgType {
         year, month, day
     }
     
@@ -122,7 +122,8 @@ public class DBConnector {
         try {
             PreparedStatement prep;
             //SELECT date_time, AVG(temp) as avg FROM roomtemps.hourly_temperatures WHERE sensor_id = 1 GROUP BY sensor_id, year(date_time);
-            prep = conn.prepareStatement("SELECT date_time, AVG(temp) as avg FROM hourly_temperatures WHERE sensor_id =(?) GROUP BY " + t + "(date_time);");
+            //prep = conn.prepareStatement("SELECT date_time, AVG(temp) as avg FROM hourly_temperatures WHERE sensor_id =(?) GROUP BY " + t + "(date_time);");
+        	prep = conn.prepareStatement("SELECT date_time, AVG(temp) as avg FROM hourly_temperatures WHERE sensor_id = (SELECT id FROM sensors WHERE number = (?)) GROUP BY " + t +"(date_time);");
             prep.setInt(1, sensor);
             ResultSet r = prep.executeQuery();
             while (r.next()) {

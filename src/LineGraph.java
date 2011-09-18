@@ -48,9 +48,13 @@ public class LineGraph {
         parent.smooth();
     }
     
-    public void addLine(ArrayList<ArrayList<Float>> a){
-        lines.add(new Line(parent, a, interval, plotX1, plotX2, plotY1, plotY2));
-        
+    public void addLine(ArrayList<ArrayList<Float>> a, int roomNum){
+    	addLine(a, roomNum, false);
+    }
+    
+    public void addLine(Line l, int roomNum, boolean loadData){
+    	lines.add(l);
+    	ArrayList<ArrayList<Float>> a = l.getData();
         //FIXME different year ranges
         //this will break if we start adding different year ranges
         //BUT I don't need that right now
@@ -83,6 +87,13 @@ public class LineGraph {
 
         if(dMax > dataMax)
             dataMax = dMax;
+        
+        if(loadData)
+        	lines.get(lastIndex).loadData();
+
+    }
+    public void addLine(ArrayList<ArrayList<Float>> a, int roomNum, boolean loadData){
+        addLine(new Line(parent, a, interval, plotX1, plotX2, plotY1, plotY2, roomNum), roomNum, loadData);
     }
     
     public void loadLineData(){
@@ -115,9 +126,9 @@ public class LineGraph {
         // parent.noStroke();
         // parent.fill(0xFF5679C1); //with eclipse need to add the 'FF' in the
         // front
-        parent.stroke(0xFF5679C1);
+        /*parent.stroke(0xFF5679C1);
         parent.strokeWeight(5);
-        parent.noFill();
+        parent.noFill();*/
         drawLines();
     }
 
@@ -189,6 +200,25 @@ public class LineGraph {
         for (Line l : lines) {
             l.drawDataArea(yearMin, yearMax);
         }
+    }
+    
+    public boolean containsRoomNumber(int roomNum){
+    	for (Line l : lines) {
+			if(l.getRoomNumber() == roomNum)
+				return true;
+		}
+    	return false;
+    }
+    
+    public Line removeLine(int roomNum){
+    	for(int i=0; i < lines.size(); ++i){
+    		Line l = lines.get(i);
+    		if(l.getRoomNumber() == roomNum){
+    			lines.remove(i);
+    			return l; 
+    		}
+    	}
+		return null;
     }
     
 }

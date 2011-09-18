@@ -1,6 +1,8 @@
 import java.awt.Color;
 import java.util.ArrayList;
 
+import javax.swing.colorchooser.ColorSelectionModel;
+
 import controlP5.CColor;
 import controlP5.ControlP5;
 import processing.core.PApplet;
@@ -13,7 +15,7 @@ public class GUI {
 
 	ControlP5 controlP5;
 	CColor c1, c2, c3, c4, c5, c6, c7;
-	ArrayList<CColor> colors;
+	private static ArrayList<CColor> colors;
 	ArrayList<controlP5.Button> rooms;
 	
 
@@ -91,7 +93,7 @@ public class GUI {
 		rooms.add(room4);
 		
 		controlP5.Button room5 = controlP5.addButton("room5", 5, 171, 356, 122,
-				105);
+				98);
 		room5.setColor(c5);
 		rooms.add(room5);
 		
@@ -119,6 +121,12 @@ public class GUI {
 	public void drawGUI() {
 		if (map != null)
 			map.draw();
+	}
+	
+	public static int getRoomColor(int room){
+		int c1 = colors.get(room-1).getBackground();
+		int c2 = colors.get(room-1).getForeground();
+		return c1 > c2 ? c1 : c2;
 	}
 
 }

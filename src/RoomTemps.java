@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import processing.core.*;
 import org.gicentre.utils.stat.*;
@@ -11,23 +12,39 @@ public class RoomTemps extends PApplet {
 	XYChart lineChart;
 
 	Image room1, room2, room3, room4, room5, room6, room7, map;
-	LineGraph l;
+	LineGraph lg;
 	GUI buttons;
+	int zoomLevel = 0;
+	
+	HashMap<Integer, Line> cachedData;
 
 	public void setup() {
 		size(1024, 768);
 		smooth();
 		frameRate(30);
 
+		cachedData = new HashMap<Integer, Line>();
+		
 		buttons = new GUI(this);
 
-		ArrayList<ArrayList<Float>> arr = db.getAvg(DBConnector.AvgType.year);
+		//ArrayList<ArrayList<Float>> arr = db.getAvg(DBConnector.AvgType.year);
 		ArrayList<ArrayList<Float>> arr1 = db.getAvgBySensor(
 				DBConnector.AvgType.year, 1);
 		ArrayList<ArrayList<Float>> arr2 = db.getAvgBySensor(
 				DBConnector.AvgType.year, 2);
+		ArrayList<ArrayList<Float>> arr3 = db.getAvgBySensor(
+				DBConnector.AvgType.year, 3);
+		ArrayList<ArrayList<Float>> arr4 = db.getAvgBySensor(
+				DBConnector.AvgType.year, 4);
+		ArrayList<ArrayList<Float>> arr5 = db.getAvgBySensor(
+				DBConnector.AvgType.year, 5);
+		ArrayList<ArrayList<Float>> arr6 = db.getAvgBySensor(
+				DBConnector.AvgType.year, 6);
+		ArrayList<ArrayList<Float>> arr7 = db.getAvgBySensor(
+				DBConnector.AvgType.year, 7);
 
-		l = new LineGraph(this);
+
+		lg = new LineGraph(this);
 
 		// if I make an Image here it work, in GUI Class it doesn't
 		map = new Image(this, "../data/evl_2nd_floor_72pxPin.png", 0, 0);
@@ -35,21 +52,26 @@ public class RoomTemps extends PApplet {
 
 		// map.resize(320, 200, true);
 
-		l.addLine(arr1);
-		l.addLine(arr2);
+		lg.addLine(arr1, 1);
+		lg.addLine(arr2, 2);
+		lg.addLine(arr3, 3);
+		lg.addLine(arr4, 4);
+		lg.addLine(arr5, 5);
+		lg.addLine(arr6, 6);
+		lg.addLine(arr7, 7);
 
 	}
 
 	public void draw() {
 		buttons.drawGUI();
-		l.drawChart();
+		lg.drawChart();
 		map.draw();
 
 		/*
 		 * room2.draw(); room1.setXY(3, 248); room2.setXY(3, 45);
 		 */
-		if (!l.isDataLoaded()) {
-			l.loadLineData();
+		if (!lg.isDataLoaded()) {
+			lg.loadLineData();
 		}
 	}
 
@@ -57,37 +79,54 @@ public class RoomTemps extends PApplet {
 		System.out.println(theEvent.controller().name());
 	}
 
-	public void room1(int theValue) {
+	
+	public void roomClicked(int theValue) {
 		buttons.toogleRoomColor(theValue);
+		if(lg.containsRoomNumber(theValue)){
+			Line l = lg.removeLine(theValue);
+			cachedData.put(zoomLevel* 10 + theValue, l);
+		}
+		else{
+			if(cachedData.containsKey(zoomLevel* 10 + theValue)){
+				try{
+					lg.addLine(cachedData.get(zoomLevel* 10 + theValue).getData(), theValue, true);
+				}
+				catch(Exception e){
+					e.printStackTrace();
+					System.out.println(e.getMessage());
+				}
+			}
+		}
+	}
+	
+	public void room1(int theValue) {
+		roomClicked(theValue);
 	}
 	
 	public void room2(int theValue) {
-		buttons.toogleRoomColor(theValue);
+		roomClicked(theValue);
 	}
 	
 	public void room3(int theValue) {
-		buttons.toogleRoomColor(theValue);
+		roomClicked(theValue);
 	}
 	
 	public void room4(int theValue) {
-		buttons.toogleRoomColor(theValue);
+		roomClicked(theValue);
 	}
 	
 	public void room5(int theValue) {
-		buttons.toogleRoomColor(theValue);
+		roomClicked(theValue);
 	}
 	
 	public void room6(int theValue) {
-		buttons.toogleRoomColor(theValue);
+		roomClicked(theValue);
 	}
 	
 	public void room7(int theValue) {
-		buttons.toogleRoomColor(theValue);
+		roomClicked(theValue);
 	}
 
-	public void toogleRoomColor(){
-		
-	}
 	
 	public void mouseClicked() {
 		// l.loadData();
