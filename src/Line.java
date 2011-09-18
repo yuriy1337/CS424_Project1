@@ -10,7 +10,7 @@ public class Line{
 
     private PApplet parent;
 
-    private ArrayList data;
+    private ArrayList<ArrayList<Float>> data;
 
     private float dataMin, dataMax;
 
@@ -22,10 +22,13 @@ public class Line{
     private int roomNumber;
     
     private int rowCount;
+    private int interval;
+    
+    private char localization;
 
     private Integrator[] interpolatorsX, interpolatorsY;
 
-    public Line(PApplet p, ArrayList d, int interval, float pX1, float pX2, float pY1, float pY2, int roomNum) {
+    public Line(PApplet p, ArrayList<ArrayList<Float>> d, int interval, float pX1, float pX2, float pY1, float pY2, int roomNum, char loc) {
         parent = p;
         data = d;
         plotX1 = pX1;
@@ -34,6 +37,10 @@ public class Line{
         plotY2 = pY2;
 
         roomNumber = roomNum;
+        
+        this.interval = interval;
+        
+        localization = loc;
         
         dataMin = PApplet.floor(Utils.getArrayListMin((ArrayList<Float>) data
                 .get(1)) / interval)
@@ -71,7 +78,11 @@ public class Line{
         }
     }
 
-    void drawDataArea(int yearMin, int yearMax) {
+    void drawDataArea(int yearMin, int yearMax, char localization) {
+    	if(this.localization != localization){
+    		this.localization = localization;
+    		toggleLocalization();
+    	}
     	parent.stroke(GUI.getRoomColor(roomNumber));
         parent.strokeWeight(5);
         parent.noFill();
@@ -145,7 +156,7 @@ public class Line{
     }
 
     void loadData() {
-        int length = ((ArrayList)data.get(0)).size();
+        int length = ((ArrayList<Float>)data.get(0)).size();
         for (int row = 0; row < length; row++) {
             float year = (Float) ((ArrayList<Float>) (data.get(0))).get(row);
             float temp = (Float) ((ArrayList<Float>) (data.get(1))).get(row);
@@ -180,8 +191,39 @@ public class Line{
     	return roomNumber;
     }
     
-    public ArrayList getData(){
+    public ArrayList<ArrayList<Float>> getData(){
     	//this is not safe
     	return data;
     }
+    
+    private void toggleLocalization(){
+    	ArrayList<Float> toArr = null;
+    	if(data.size() == 3)
+    		toArr = data.get(2); 
+    	else
+    		toArr = new ArrayList<Float>();
+    	ArrayList<Float> currArr = data.get(1);
+    	if(toArr.size() == 0){
+    		data.add(toArr);
+    		for (Float f : currArr) {
+    			float c = (float)((5.0/9)*(f - 32));
+    			toArr.add(c);
+			}
+    	}
+    	
+    	for (int i = 0; i < currArr.size(); i++) {
+			interpolatorsY[i].target(toArr.get(i));
+		}
+    	
+    	data.set(1, toArr);
+    	data.set(2, currArr);
+    	
+        dataMin = PApplet.floor(Utils.getArrayListMin((ArrayList<Float>) data
+                .get(1)) / interval)
+                * interval;
+        dataMax = PApplet.ceil(Utils.getArrayListMax((ArrayList<Float>) data
+                .get(1)) / interval)
+                * interval;
+    }
+    
 }

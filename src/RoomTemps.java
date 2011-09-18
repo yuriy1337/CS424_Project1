@@ -88,13 +88,7 @@ public class RoomTemps extends PApplet {
 		}
 		else{
 			if(cachedData.containsKey(zoomLevel* 10 + theValue)){
-				try{
-					lg.addLine(cachedData.get(zoomLevel* 10 + theValue).getData(), theValue, true);
-				}
-				catch(Exception e){
-					e.printStackTrace();
-					System.out.println(e.getMessage());
-				}
+				lg.addLine(cachedData.get(zoomLevel* 10 + theValue).getData(), theValue, true);
 			}
 		}
 	}
@@ -125,6 +119,10 @@ public class RoomTemps extends PApplet {
 	
 	public void room7(int theValue) {
 		roomClicked(theValue);
+	}
+	
+	public void Change_Locale(int theValue){
+		lg.toggleLocalization();
 	}
 
 	

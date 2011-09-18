@@ -26,9 +26,13 @@ public class LineGraph {
     
     private PFont plotFont;
     
-    ArrayList<Line> lines;
+    private ArrayList<Line> lines;
     
     private boolean isDataLoaded = false;
+    
+    private char localization = 'F';
+    
+    boolean updateYRanges = false;
     
     public LineGraph(PApplet p){
         parent = p;
@@ -93,7 +97,7 @@ public class LineGraph {
 
     }
     public void addLine(ArrayList<ArrayList<Float>> a, int roomNum, boolean loadData){
-        addLine(new Line(parent, a, interval, plotX1, plotX2, plotY1, plotY2, roomNum), roomNum, loadData);
+        addLine(new Line(parent, a, interval, plotX1, plotX2, plotY1, plotY2, roomNum, 'F'), roomNum, loadData);
     }
     
     public void loadLineData(){
@@ -121,7 +125,7 @@ public class LineGraph {
         updateLines();
 
         drawYearLabels();
-        drawVolumeLabels();
+        
 
         // parent.noStroke();
         // parent.fill(0xFF5679C1); //with eclipse need to add the 'FF' in the
@@ -130,6 +134,8 @@ public class LineGraph {
         parent.strokeWeight(5);
         parent.noFill();*/
         drawLines();
+        
+        drawVolumeLabels();
     }
 
     private void drawAxisLabels() {
@@ -169,6 +175,10 @@ public class LineGraph {
 
         parent.stroke(128);
         parent.strokeWeight(1);
+        
+        if(updateYRanges){
+        	updateYRanges();
+        }
 
         for (float v = dataMin; v <= dataMax; v += intervalMinor) {
             if (v % intervalMinor == 0) { // If a tick mark
@@ -184,13 +194,32 @@ public class LineGraph {
                     parent.text(PApplet.floor(v), plotX1 - 10, y + textOffset);
                     parent.line(plotX1 - 4, y, plotX1, y); // Draw major tick
                 } else {
-                    // parent.line(plotX1 - 2, y, plotX1, y); // Draw minor tick
+                	parent.line(plotX1 - 2, y, plotX1, y); // Draw minor tick
                 }
             }
         }
     }
     
-    private void updateLines(){
+    private void updateYRanges() {
+    	dataMin = 0;
+    	dataMax = 0;
+        for (Line l : lines) {
+            
+        	float dMin = l.getDataMin();
+        	float dMax = l.getDataMax();
+        	
+            if(dataMin == 0)
+            	dataMin = dMin;
+            
+            if(dMin < dataMin)
+                dataMin = dMin;
+
+            if(dMax > dataMax)
+                dataMax = dMax;
+        }	
+	}
+
+	private void updateLines(){
         for (Line l : lines) {
             l.updateInterpolators();
         }
@@ -198,7 +227,7 @@ public class LineGraph {
     
     private void drawLines(){
         for (Line l : lines) {
-            l.drawDataArea(yearMin, yearMax);
+            l.drawDataArea(yearMin, yearMax, localization);
         }
     }
     
@@ -221,4 +250,12 @@ public class LineGraph {
 		return null;
     }
     
+    public void toggleLocalization(){
+    	if(localization == 'F')
+    		localization = 'C';
+    	else
+    		localization = 'F';
+    	
+    	updateYRanges = true;
+    }
 }

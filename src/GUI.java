@@ -28,6 +28,12 @@ public class GUI {
 		// map = new Image(p, "../data/evl_2nd_floor_72pxPin.png", 0, 0);
 		initColors();
 		createRoomButtons();
+		createTempChngrBttn();
+	}
+
+	private void createTempChngrBttn() {
+		controlP5.Button temperatureButton = controlP5.addButton("Change_Locale", 1, parent.width - 100, 10, 72,
+				12);
 	}
 
 	private void initColors() {
