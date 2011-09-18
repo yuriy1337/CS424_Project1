@@ -158,4 +158,15 @@ public class Line{
                 .get(0)));
     }
     
+    public float getDataMin(){
+        return Math.round(Utils.getArrayListMin((ArrayList<Float>) data
+                .get(1)));
+
+    }
+    
+    public float getDataMax(){
+        return Math.round(Utils.getArrayListMax((ArrayList<Float>) data
+                .get(1)));
+
+    }
 }

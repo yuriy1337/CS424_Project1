@@ -35,7 +35,7 @@ public class LineGraph {
         
         lines = new ArrayList<Line>();
         
-        plotX1 = 120;
+        plotX1 = 420;
         plotX2 = parent.width - 80;
         labelX = 50;
         plotY1 = 60;
@@ -60,6 +60,8 @@ public class LineGraph {
         int lastIndex = lines.size() - 1;
         int yMN = lines.get(lastIndex).getYearMin();
         int yMX = lines.get(lastIndex).getYearMax();
+        float dMin = lines.get(lastIndex).getDataMin();
+        float dMax = lines.get(lastIndex).getDataMax();
         
         if(rows > rowCount)
             rowCount = rows;
@@ -67,11 +69,20 @@ public class LineGraph {
         if(yearMin == 0)
             yearMin = yMN;
         
+        if(dataMin == 0)
+        	dataMin = dMin;
+        	
         if(yMN < yearMin)
             yearMin = yMN;
 
         if(yMX > yearMax)
             yearMax = yMX;
+        
+        if(dMin < dataMin)
+            dataMin = dMin;
+
+        if(dMax > dataMax)
+            dataMax = dMax;
     }
     
     public void loadLineData(){
