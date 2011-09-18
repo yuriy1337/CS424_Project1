@@ -21,7 +21,7 @@ public class LineGraph {
     
     private int rowCount;
     
-    private int[] years;
+    private ArrayList<Float> years;
     private int yearMin, yearMax;
     
     private PFont plotFont;
@@ -52,22 +52,22 @@ public class LineGraph {
         parent.smooth();
     }
     
-    public void addLine(ArrayList<ArrayList<Float>> a, int roomNum){
+    public void addLine(DataContainer a, int roomNum){
     	addLine(a, roomNum, false);
     }
     
     public void addLine(Line l, int roomNum, boolean loadData){
     	lines.add(l);
-    	ArrayList<ArrayList<Float>> a = l.getData();
+    	DataContainer a = l.getData();
         //FIXME different year ranges
         //this will break if we start adding different year ranges
         //BUT I don't need that right now
-        years = Utils.floatArrToIntArr((ArrayList<Float>) a.get(0));
+        years = a.getDatesArr();
         
-        int rows = a.get(0).size();
+        int rows = a.size();
         int lastIndex = lines.size() - 1;
-        int yMN = lines.get(lastIndex).getYearMin();
-        int yMX = lines.get(lastIndex).getYearMax();
+        int yMN = lines.get(lastIndex).getXMin();
+        int yMX = lines.get(lastIndex).getXMax();
         float dMin = lines.get(lastIndex).getDataMin();
         float dMax = lines.get(lastIndex).getDataMax();
         
@@ -96,7 +96,7 @@ public class LineGraph {
         	lines.get(lastIndex).loadData();
 
     }
-    public void addLine(ArrayList<ArrayList<Float>> a, int roomNum, boolean loadData){
+    public void addLine(DataContainer a, int roomNum, boolean loadData){
         addLine(new Line(parent, a, interval, plotX1, plotX2, plotY1, plotY2, roomNum, 'F'), roomNum, loadData);
     }
     
@@ -150,6 +150,10 @@ public class LineGraph {
     }
 
     private void drawYearLabels() {
+    	
+    	if(lines.size() == 0)
+    		return; //there is nothing to draw
+    	
         parent.fill(0);
         parent.textSize(10);
         parent.textAlign(PConstants.CENTER);
@@ -159,10 +163,10 @@ public class LineGraph {
         parent.strokeWeight(1);
 
         for (int row = 0; row < rowCount; row++) {
-             if (years[row] % yearInterval == 0) {
-                float x = PApplet.map(years[row], yearMin, yearMax, plotX1,
+             if (years.get(row) % yearInterval == 0) {
+                float x = PApplet.map(years.get(row), yearMin, yearMax, plotX1,
                         plotX2);
-                parent.text(years[row], x, plotY2 + parent.textAscent() + 10);
+                parent.text(lines.get(0).getData().getStringDateFromFloat(years.get(row)), x, plotY2 + parent.textAscent() + 10);
                 parent.line(x, plotY1, x, plotY2);
             }
         }

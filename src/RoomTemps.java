@@ -28,19 +28,18 @@ public class RoomTemps extends PApplet {
 		buttons = new GUI(this);
 
 		//ArrayList<ArrayList<Float>> arr = db.getAvg(DBConnector.AvgType.year);
-		ArrayList<ArrayList<Float>> arr1 = db.getAvgBySensor(
-				DBConnector.AvgType.year, 1);
-		ArrayList<ArrayList<Float>> arr2 = db.getAvgBySensor(
+		DataContainer arr1 = db.getAvgBySensor(DBConnector.AvgType.year, 1);
+		DataContainer arr2 = db.getAvgBySensor(
 				DBConnector.AvgType.year, 2);
-		ArrayList<ArrayList<Float>> arr3 = db.getAvgBySensor(
+		DataContainer arr3 = db.getAvgBySensor(
 				DBConnector.AvgType.year, 3);
-		ArrayList<ArrayList<Float>> arr4 = db.getAvgBySensor(
+		DataContainer arr4 = db.getAvgBySensor(
 				DBConnector.AvgType.year, 4);
-		ArrayList<ArrayList<Float>> arr5 = db.getAvgBySensor(
+		DataContainer arr5 = db.getAvgBySensor(
 				DBConnector.AvgType.year, 5);
-		ArrayList<ArrayList<Float>> arr6 = db.getAvgBySensor(
+		DataContainer arr6 = db.getAvgBySensor(
 				DBConnector.AvgType.year, 6);
-		ArrayList<ArrayList<Float>> arr7 = db.getAvgBySensor(
+		DataContainer arr7 = db.getAvgBySensor(
 				DBConnector.AvgType.year, 7);
 
 
@@ -53,13 +52,14 @@ public class RoomTemps extends PApplet {
 		// map.resize(320, 200, true);
 
 		lg.addLine(arr1, 1);
+	
 		lg.addLine(arr2, 2);
 		lg.addLine(arr3, 3);
 		lg.addLine(arr4, 4);
 		lg.addLine(arr5, 5);
 		lg.addLine(arr6, 6);
 		lg.addLine(arr7, 7);
-
+	 	
 	}
 
 	public void draw() {

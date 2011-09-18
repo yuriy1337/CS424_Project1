@@ -10,14 +10,14 @@ public class Line{
 
     private PApplet parent;
 
-    private ArrayList<ArrayList<Float>> data;
+    private DataContainer data;
 
     private float dataMin, dataMax;
 
     private float plotX1, plotY1;
     private float plotX2, plotY2;
     
-    private int yearMin, yearMax;
+    private int xMin, xMax;
 
     private int roomNumber;
     
@@ -28,7 +28,7 @@ public class Line{
 
     private Integrator[] interpolatorsX, interpolatorsY;
 
-    public Line(PApplet p, ArrayList<ArrayList<Float>> d, int interval, float pX1, float pX2, float pY1, float pY2, int roomNum, char loc) {
+    public Line(PApplet p, DataContainer d, int interval, float pX1, float pX2, float pY1, float pY2, int roomNum, char loc) {
         parent = p;
         data = d;
         plotX1 = pX1;
@@ -42,15 +42,11 @@ public class Line{
         
         localization = loc;
         
-        dataMin = PApplet.floor(Utils.getArrayListMin((ArrayList<Float>) data
-                .get(1)) / interval)
-                * interval;
-        dataMax = PApplet.ceil(Utils.getArrayListMax((ArrayList<Float>) data
-                .get(1)) / interval)
-                * interval;
+        dataMin = PApplet.floor(Utils.getArrayListMin(data.getTempsArr()) / interval)* interval;
+        dataMax = PApplet.ceil(Utils.getArrayListMax(data.getTempsArr()) / interval)* interval;
         
-        yearMin = getYearMin();
-        yearMax = getYearMax();
+        xMin = getXMin();
+        xMax = getXMax();
 
         //interpolatorsY = new Integrator[rowCount];
         /*
@@ -156,34 +152,32 @@ public class Line{
     }
 
     void loadData() {
-        int length = ((ArrayList<Float>)data.get(0)).size();
+        int length = data.size();
+        ArrayList<Float> xValues = data.getDatesArr();
+        ArrayList<Float> temps = data.getTempsArr();
         for (int row = 0; row < length; row++) {
-            float year = (Float) ((ArrayList<Float>) (data.get(0))).get(row);
-            float temp = (Float) ((ArrayList<Float>) (data.get(1))).get(row);
-            addPoint(year, temp);
+            float date = xValues.get(row);
+            float temp = temps.get(row);
+            addPoint(date, temp);
         }
     }
     
-    public int getYearMin(){
-        return Math.round(Utils.getArrayListMin((ArrayList<Float>) data
-                .get(0)));
+    public int getXMin(){
+        return Math.round(Utils.getArrayListMin(data.getDatesArr()));
 
     }
     
-    public int getYearMax(){
-        return Math.round(Utils.getArrayListMax((ArrayList<Float>) data
-                .get(0)));
+    public int getXMax(){
+        return Math.round(Utils.getArrayListMax(data.getDatesArr()));
     }
     
     public float getDataMin(){
-        return Math.round(Utils.getArrayListMin((ArrayList<Float>) data
-                .get(1)));
+        return Math.round(Utils.getArrayListMin(data.getTempsArr()));
 
     }
     
     public float getDataMax(){
-        return Math.round(Utils.getArrayListMax((ArrayList<Float>) data
-                .get(1)));
+        return Math.round(Utils.getArrayListMax(data.getTempsArr()));
 
     }
     
@@ -191,39 +185,21 @@ public class Line{
     	return roomNumber;
     }
     
-    public ArrayList<ArrayList<Float>> getData(){
-    	//this is not safe
+    public DataContainer getData(){
     	return data;
     }
     
     private void toggleLocalization(){
-    	ArrayList<Float> toArr = null;
-    	if(data.size() == 3)
-    		toArr = data.get(2); 
-    	else
-    		toArr = new ArrayList<Float>();
-    	ArrayList<Float> currArr = data.get(1);
-    	if(toArr.size() == 0){
-    		data.add(toArr);
-    		for (Float f : currArr) {
-    			float c = (float)((5.0/9)*(f - 32));
-    			toArr.add(c);
-			}
-    	}
     	
-    	for (int i = 0; i < currArr.size(); i++) {
-			interpolatorsY[i].target(toArr.get(i));
+    	data.toggleLocalization();
+    	
+    	for (int i = 0; i < data.size(); i++) {
+			interpolatorsY[i].target(data.getTempsArr().get(i));
 		}
     	
-    	data.set(1, toArr);
-    	data.set(2, currArr);
     	
-        dataMin = PApplet.floor(Utils.getArrayListMin((ArrayList<Float>) data
-                .get(1)) / interval)
-                * interval;
-        dataMax = PApplet.ceil(Utils.getArrayListMax((ArrayList<Float>) data
-                .get(1)) / interval)
-                * interval;
+        dataMin = PApplet.floor(Utils.getArrayListMin(data.getTempsArr()) / interval)* interval;
+        dataMax = PApplet.ceil(Utils.getArrayListMax(data.getTempsArr()) / interval)* interval;
     }
     
 }

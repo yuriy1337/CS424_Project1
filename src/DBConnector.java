@@ -105,18 +105,21 @@ public class DBConnector {
 
     }
     
-    public ArrayList<ArrayList<Float>> getAvgBySensor(AvgType t, int sensor) {
+    public DataContainer getAvgBySensor(AvgType t, int sensor) {
         connectToDB(dbName);
         ArrayList<ArrayList<Float>> arr = new ArrayList<ArrayList<Float>>();
+        DataContainer dc = null;
         arr.add(new ArrayList<Float>());
         arr.add(new ArrayList<Float>());
         SimpleDateFormat ts= new SimpleDateFormat();
         switch(t){
         case year:
             ts.applyPattern("yyyy");
+            dc = new DataContainer('Y');
             break;
         case month:
             ts.applyPattern("MM");
+            dc = new DataContainer('M');
             break;
         }
         try {
@@ -127,13 +130,23 @@ public class DBConnector {
             prep.setInt(1, sensor);
             ResultSet r = prep.executeQuery();
             while (r.next()) {
-                ((ArrayList<Float>) arr.get(0)).add(Float.valueOf(ts.format(r.getDate(1))));
-                ((ArrayList<Float>) arr.get(1)).add(r.getFloat(2));
+
+                Date date = r.getDate(1);
+				String d = ts.format(date);
+                Float f = Float.valueOf(d);
+                
+                
+                Float f2 = r.getFloat(2);
+                
+                dc.add(f2, date);
+                
+				((ArrayList<Float>) arr.get(0)).add(f);
+                ((ArrayList<Float>) arr.get(1)).add(f2);
             }
             prep.close();
             r.close();
             closeConnToDB();
-            return arr;
+            return dc;
         } catch (SQLException e) {
             e.printStackTrace();
         }
