@@ -1,4 +1,6 @@
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 
 import processing.core.PApplet;
 import processing.core.PConstants;
@@ -15,14 +17,16 @@ public class LineGraph {
     
     private float dataMin, dataMax;
     
-    private int yearInterval = 1;
+    public int xInterval = 1;
     private int interval = 1;
     private int intervalMinor = 1;
     
+    private float startX = (float) 50701.0, endX = (float)110601.0; 
+    
     private int rowCount;
     
-    private ArrayList<Float> years;
-    private int yearMin, yearMax;
+    //private ArrayList<Float> years;
+    private float yearMin, yearMax;
     
     private PFont plotFont;
     
@@ -33,8 +37,10 @@ public class LineGraph {
     private char localization = 'F';
     
     boolean updateYRanges = false;
-    
+    private int zoomLevel = 0;
     Selector selec;
+    
+    Table t;
     
     public LineGraph(PApplet p){
         parent = p;
@@ -54,29 +60,33 @@ public class LineGraph {
         parent.textFont(plotFont);
 
         parent.smooth();
+        
     }
     
-    public void addLine(DataContainer a, int roomNum){
-    	addLine(a, roomNum, false);
+    public Line addLine(DataContainer a, int roomNum){
+    	return addLine(a, roomNum, false);
     }
     
-    public void addLine(Line l, int roomNum, boolean loadData){
+    public Line addLine(Line l, int roomNum, boolean loadData){
     	lines.add(l);
     	DataContainer a = l.getData();
         //FIXME different year ranges
         //this will break if we start adding different year ranges
         //BUT I don't need that right now
-        years = a.getDatesArr();
+        //years = a.getDatesArr();
         
         int rows = a.size();
         int lastIndex = lines.size() - 1;
-        int yMN = lines.get(lastIndex).getXMin();
-        int yMX = lines.get(lastIndex).getXMax();
+        float yMN = lines.get(lastIndex).getXMin();
+        float yMX = lines.get(lastIndex).getXMax();
         float dMin = lines.get(lastIndex).getDataMin();
         float dMax = lines.get(lastIndex).getDataMax();
         
         if(rows > rowCount)
             rowCount = rows;
+        
+        if(rowCount == 0)
+        	rowCount = rows;
         
         if(yearMin == 0)
             yearMin = yMN;
@@ -98,10 +108,12 @@ public class LineGraph {
         
         if(loadData)
         	lines.get(lastIndex).loadData();
+        
+        return l;
 
     }
-    public void addLine(DataContainer a, int roomNum, boolean loadData){
-        addLine(new Line(parent, a, interval, plotX1, plotX2, plotY1, plotY2, roomNum, 'F'), roomNum, loadData);
+    public Line addLine(DataContainer a, int roomNum, boolean loadData){
+        return addLine(new Line(parent, a, xInterval, interval, plotX1, plotX2, plotY1, plotY2, roomNum, 'F', startX, endX), roomNum, loadData);
     }
     
     public void loadLineData(){
@@ -124,6 +136,9 @@ public class LineGraph {
         parent.noStroke();
         parent.rect(plotX1, plotY1, plotX2, plotY2);
 
+        if(lines.size() > 0)
+        	updateYRanges();
+        
         drawAxisLabels();
 
         updateLines();
@@ -141,8 +156,18 @@ public class LineGraph {
         
         drawVolumeLabels();
         
-        if(lines.size() > 0)
+        if(lines.size() > 0){
+        	if(zoomLevel == 0)
+        		selec.setNumOfSelections(6);
+        	if(zoomLevel == 1)
+        		selec.setNumOfSelections(11);
+        	if(zoomLevel == 2)
+        		selec.setNumOfSelections(lines.get(0).getData().size()-1);
         	selec.draw();
+        }
+        
+        if(t != null)
+        	t.draw();
     }
 
     private void drawAxisLabels() {
@@ -168,13 +193,18 @@ public class LineGraph {
         // Use thin, gray lines to draw the grid
         parent.stroke(224);
         parent.strokeWeight(1);
-
+        yearMin = lines.get(0).getXMin();
+        yearMax = lines.get(0).getXMax();
+        int selections = 0;
         for (int row = 0; row < rowCount; row++) {
-             if (years.get(row) % yearInterval == 0) {
-                float x = PApplet.map(years.get(row), yearMin, yearMax, plotX1,
+        	float date = lines.get(0).getData().getDatesArr().get(row);
+        	if(date>= startX && date<= endX)
+             if (date % xInterval == 1 || date % xInterval == 0 || date == 50701.0) {
+                float x = PApplet.map(date, yearMin, yearMax, plotX1,
                         plotX2);
-                parent.text(lines.get(0).getData().getStringDateFromFloat(years.get(row)), x, plotY2 + parent.textAscent() + 10);
+                parent.text(lines.get(0).getData().getStringDateFromFloat(date), x, plotY2 + parent.textAscent() + 10);
                 parent.line(x, plotY1, x, plotY2);
+                selections++;
             }
         }
     }
@@ -186,10 +216,6 @@ public class LineGraph {
 
         parent.stroke(128);
         parent.strokeWeight(1);
-        
-        if(updateYRanges){
-        	updateYRanges();
-        }
 
         for (float v = dataMin; v <= dataMax; v += intervalMinor) {
             if (v % intervalMinor == 0) { // If a tick mark
@@ -212,10 +238,10 @@ public class LineGraph {
     }
     
     private void updateYRanges() {
-    	dataMin = 0;
-    	dataMax = 0;
+    	dataMin = 999999;
+    	dataMax = -99999;
         for (Line l : lines) {
-            
+            if(l!=null){
         	float dMin = l.getDataMin();
         	float dMax = l.getDataMax();
         	
@@ -227,6 +253,7 @@ public class LineGraph {
 
             if(dMax > dataMax)
                 dataMax = dMax;
+            }
         }	
 	}
 
@@ -238,7 +265,7 @@ public class LineGraph {
     
     private void drawLines(){
         for (Line l : lines) {
-            l.drawDataArea(yearMin, yearMax, localization);
+            l.drawDataArea(yearMin = lines.get(0).getXMin(), yearMax = lines.get(0).getXMax(), localization);
         }
     }
     
@@ -268,5 +295,89 @@ public class LineGraph {
     		localization = 'F';
     	
     	updateYRanges = true;
+    }
+    
+    public String getSelectionStartYear(){
+    	
+    	int start = (int) selec.getStart();
+    	
+    	if(lines.size() > 0){
+    		return lines.get(0).getData().getYearString(start);
+    	}
+    	
+    	return "";
+    }
+    
+    public String getSelectionStartMonth(){
+    	
+    	int start = (int) selec.getStart();
+    	
+    	if(lines.size() > 0){
+    		return lines.get(0).getData().getMonthString(start);
+    	}
+    	
+    	return "";
+    }
+    
+    public String getSelectionEndtDate(){
+    	
+    	int start = (int) selec.getStart();
+    	
+    	if(lines.size() > 0){
+    		return lines.get(0).getData().getYearString(start + 1);
+    	}
+    	
+    	return "";
+    }
+    
+    public boolean hasSelection(){
+    	return selec.hasSelection();
+    }
+    
+    public void removeAllLines(){
+    	lines.clear();
+    }
+    
+    public String getLastMonth(){
+    	return lines.get(0).getData().getMonthString(lines.get(0).getData().size() -1 );
+    }
+    
+    public String getLastYear(){
+    	return lines.get(0).getData().getYearString(lines.get(0).getData().size() -1 );
+    }
+    
+    public String getNextMonth(){
+    	Date d = lines.get(0).getData().getDateObject(lines.get(0).getData().size() -1 );
+    	Calendar c = Calendar.getInstance();
+    	int month = c.get(Calendar.MONTH);
+    	c.setTime(d);
+    	month = c.get(Calendar.MONTH);
+    	c.add(Calendar.MONTH, 1);
+    	month = c.get(Calendar.MONTH);
+    	return ""+(month+1);	//calendar return months 0-11, but we need them 1-12
+    }
+    
+    public String getNextMonthYear(){
+    	Date d = lines.get(0).getData().getDateObject(lines.get(0).getData().size() -1 );
+    	Calendar c = Calendar.getInstance();
+    	c.setTime(d);
+    	c.add(Calendar.MONTH, 1);
+    	Date a = c.getTime();
+    	int year = c.get(Calendar.YEAR);
+    	return ""+year;
+    }
+    
+    public void createTable(){
+    	t = new Table(parent, lines, plotX1, plotX2, plotY1, plotY2);
+    }
+    public void deleteTable(){
+    	t = null;
+    }
+    
+    public void setZoomLevel(int z){
+    	zoomLevel = z;
+    }
+    public void resetRowCount(){
+    	rowCount = 0;
     }
 }

@@ -17,6 +17,9 @@ public class GUI {
 	CColor c1, c2, c3, c4, c5, c6, c7;
 	private static ArrayList<CColor> colors;
 	ArrayList<controlP5.Button> rooms;
+	controlP5.Button next;
+	controlP5.Button back;
+	private int zoomLevel = 0;
 	
 
 	public GUI(PApplet p) {
@@ -29,6 +32,33 @@ public class GUI {
 		initColors();
 		createRoomButtons();
 		createTempChngrBttn();
+		createNextBackButtons();
+		createTableButton();
+		createResetButton();
+	}
+
+	private void createResetButton() {
+		controlP5.Button reset = controlP5.addButton("reset", 1, parent.width - 250, 10, 35,
+				12);
+	}
+
+	private void createTableButton() {
+		  //controlP5.addToggle("viewTable",false,parent.width - 175,10,50,15).setMode(ControlP5.SWITCH);
+		  controlP5.Toggle t = controlP5.addToggle("viewTable",false,parent.width - 175,10,50,15);
+		  t.setMode(ControlP5.SWITCH);
+		  t.setColorCaptionLabel(0xFF000000);
+	}
+
+	private void createNextBackButtons() {
+		next = controlP5.addButton("next", 1, 420, 40, 36,
+				12);
+		
+		back = controlP5.addButton("back", 1, parent.width - 75, 40, 36,
+				12);
+		
+		next.setVisible(false);
+		back.setVisible(false);
+		
 	}
 
 	private void createTempChngrBttn() {
@@ -40,38 +70,38 @@ public class GUI {
 		
 		colors = new ArrayList<CColor>();
 		c1 = new CColor();
-		c1.setForeground(0xFFD73027);
-		c1.setBackground(0xAAD73027);
+		c1.setForeground(0xAAD73027);
+		c1.setBackground(0xFFD73027);
 		colors.add(c1);
 
 		c2 = new CColor();
-		c2.setForeground(0xFFFC8D59);
-		c2.setBackground(0xAAFC8D59);
+		c2.setForeground(0xAAFC8D59);
+		c2.setBackground(0xFFFC8D59);
 		colors.add(c2);
 
 		c3 = new CColor();
-		c3.setForeground(0xFFFEE090);
-		c3.setBackground(0xAAFEE090);
+		c3.setForeground(0xAAFEE090);
+		c3.setBackground(0xFFFEE090);
 		colors.add(c3);
 		
 		c4 = new CColor();
-		c4.setForeground(0xFFFFFFBF);
-		c4.setBackground(0xAAFFFFBF);
+		c4.setForeground(0xAAFFFFBF);
+		c4.setBackground(0xFFFFFFBF);
 		colors.add(c4);
 		
 		c5 = new CColor();
-		c5.setForeground(0xFFE0F3F8);
-		c5.setBackground(0xAAE0F3F8);
+		c5.setForeground(0xAAE0F3F8);
+		c5.setBackground(0xFFE0F3F8);
 		colors.add(c5);
 		
 		c6 = new CColor();
-		c6.setForeground(0xFF91BFDB);
-		c6.setBackground(0xAA91BFDB);
+		c6.setForeground(0xAA91BFDB);
+		c6.setBackground(0xFF91BFDB);
 		colors.add(c6);
 		
 		c7 = new CColor();
-		c7.setForeground(0xFF4575B4);
-		c7.setBackground(0xAA4575B4);
+		c7.setForeground(0xAA4575B4);
+		c7.setBackground(0xFF4575B4);
 		colors.add(c7);
 	}
 
@@ -134,5 +164,21 @@ public class GUI {
 		int c2 = colors.get(room-1).getForeground();
 		return c1 > c2 ? c1 : c2;
 	}
-
+	
+	public boolean isRoomSelected(int room){
+		CColor c = rooms.get(room-1).getColor();
+		if(c.getBackground() > 0xFF000000)
+			return true;
+		else
+			return false;
+	}
+	
+	public void setZoomLevel(int zoom){
+		zoomLevel = zoom;
+		if(zoomLevel > 0){
+			next.setVisible(true);
+			back.setVisible(true);
+		}
+	}
 }
+

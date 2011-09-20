@@ -17,18 +17,20 @@ public class Line{
     private float plotX1, plotY1;
     private float plotX2, plotY2;
     
-    private int xMin, xMax;
+    private float xMin, xMax;
 
+    private float xStart, xEnd;
+    
     private int roomNumber;
     
     private int rowCount;
-    private int interval;
+    private int xInterval, yInterval;
     
     private char localization;
 
-    private Integrator[] interpolatorsX, interpolatorsY;
+    private ArrayList<Integrator> interpolatorsX, interpolatorsY;
 
-    public Line(PApplet p, DataContainer d, int interval, float pX1, float pX2, float pY1, float pY2, int roomNum, char loc) {
+    public Line(PApplet p, DataContainer d, int xInterval, int yInterval, float pX1, float pX2, float pY1, float pY2, int roomNum, char loc, float sX, float eX) {
         parent = p;
         data = d;
         plotX1 = pX1;
@@ -38,12 +40,16 @@ public class Line{
 
         roomNumber = roomNum;
         
-        this.interval = interval;
+        this.xInterval = xInterval;
+        this.yInterval = yInterval;
         
         localization = loc;
         
-        dataMin = PApplet.floor(Utils.getArrayListMin(data.getTempsArr()) / interval)* interval;
-        dataMax = PApplet.ceil(Utils.getArrayListMax(data.getTempsArr()) / interval)* interval;
+        xStart = sX;
+        xEnd = eX;
+        
+        dataMin = PApplet.floor(Utils.getArrayListMin(data.getTempsArr()) / yInterval)* yInterval;
+        dataMax = PApplet.ceil(Utils.getArrayListMax(data.getTempsArr()) / yInterval)* yInterval;
         
         xMin = getXMin();
         xMax = getXMax();
@@ -68,13 +74,13 @@ public class Line{
     public void updateInterpolators(){
         for (int row = 0; row < rowCount; row++) {
             if (interpolatorsX != null && interpolatorsY != null) {
-                interpolatorsY[row].update();
-                interpolatorsX[row].update();
+                interpolatorsY.get(row).update();
+                interpolatorsX.get(row).update();
             }
         }
     }
 
-    void drawDataArea(int yearMin, int yearMax, char localization) {
+    void drawDataArea(float yearMin, float yearMax, char localization) {
     	if(this.localization != localization){
     		this.localization = localization;
     		toggleLocalization();
@@ -85,12 +91,16 @@ public class Line{
         parent.beginShape();
         for (int row = 0; row < rowCount; row++) {
             // TODO FIXME
+        	
             if (interpolatorsX != null && interpolatorsY != null) {
-                float valueY = interpolatorsY[row].value;
-                float valueX = interpolatorsX[row].value;
+                float valueY = interpolatorsY.get(row).value;
+                float valueX = interpolatorsX.get(row).value;
+
+                //if(valueX % xInterval == 0 || valueX % xInterval == 1 || valueX == 50701.0){
                 float x = PApplet.map(valueX, yearMin, yearMax, plotX1, plotX2);
                 float y = PApplet.map(valueY, dataMin, dataMax, plotY2, plotY1);
                 parent.vertex(x, y);
+            //}
             }
         }
         // for fill:
@@ -103,35 +113,31 @@ public class Line{
     void addPoint(Float year, Float temp) {
 
         if (rowCount == 0) {
-            interpolatorsX = new Integrator[rowCount];
-            interpolatorsY = new Integrator[rowCount];
-            interpolatorsX = Utils.AppendItemToArray(interpolatorsX,
-                    new Integrator(parent, year));
-            interpolatorsX[rowCount].attraction = (float) 0.1; // Set lower than
+            interpolatorsX = new ArrayList<Integrator>();
+            interpolatorsY = new ArrayList<Integrator>();
+            interpolatorsX.add(new Integrator(parent, year));
+            interpolatorsX.get(rowCount).attraction = (float) 0.1; // Set lower than
                                                                // the default
 
-            interpolatorsY = Utils.AppendItemToArray(interpolatorsY,
-                    new Integrator(parent, temp));
-            interpolatorsY[rowCount].attraction = (float) 0.1; // Set lower than
+            interpolatorsY.add(new Integrator(parent, temp));
+            interpolatorsY.get(rowCount).attraction = (float) 0.1; // Set lower than
                                                                // the default
-            interpolatorsX[rowCount].target(year);
-            interpolatorsY[rowCount].target(temp);
+            interpolatorsX.get(rowCount).target(year);
+            interpolatorsY.get(rowCount).target(temp);
             rowCount++;
         } else {
-            interpolatorsX = Utils.AppendItemToArray(interpolatorsX,
-                    new Integrator(parent, interpolatorsX[rowCount-1].value));
-            interpolatorsX[rowCount-1].attraction = (float) 0.1; // Set lower than
+            interpolatorsX.add(new Integrator(parent, interpolatorsX.get(rowCount-1).value));
+            interpolatorsX.get(rowCount-1).attraction = (float) 0.1; // Set lower than
                                                                // the default
 
-            interpolatorsY = Utils.AppendItemToArray(interpolatorsY,
-                    new Integrator(parent, interpolatorsY[rowCount-1].value));
-            interpolatorsY[rowCount-1].attraction = (float) 0.1; // Set lower than
+            interpolatorsY.add(new Integrator(parent, interpolatorsY.get(rowCount-1).value));
+            interpolatorsY.get(rowCount-1).attraction = (float) 0.1; // Set lower than
                                                                // the default
 
             
 
-            interpolatorsX[rowCount].target(year);
-            interpolatorsY[rowCount].target(temp);
+            interpolatorsX.get(rowCount).target(year);
+            interpolatorsY.get(rowCount).target(temp);
             
             rowCount++;
         }
@@ -162,13 +168,37 @@ public class Line{
         }
     }
     
-    public int getXMin(){
-        return Math.round(Utils.getArrayListMin(data.getDatesArr()));
+    void loadData(DataContainer data) {
+        int length = data.size();
+        ArrayList<Float> xValues = data.getDatesArr();
+        ArrayList<Float> temps = data.getTempsArr();
+        for (int row = 0; row < length; row++) {
+            float date = xValues.get(row);
+            float temp = temps.get(row);
+            addPoint(date, temp);
+            removeFirstPoint();
+        }
+        this.data.add(data, this.data.size());
+    }
+    
+    private void removePoint(int i) {
+    	interpolatorsX.remove(i);
+    	interpolatorsY.remove(i);
+    	data.removePoint(i);
+    	rowCount--;
+	}
+    
+    private void removeFirstPoint(){
+    	removePoint(0);
+    }
+
+	public float getXMin(){
+        return Utils.getArrayListMin(data.getDatesArr());
 
     }
     
-    public int getXMax(){
-        return Math.round(Utils.getArrayListMax(data.getDatesArr()));
+    public float getXMax(){
+        return Utils.getArrayListMax(data.getDatesArr());
     }
     
     public float getDataMin(){
@@ -194,12 +224,20 @@ public class Line{
     	data.toggleLocalization();
     	
     	for (int i = 0; i < data.size(); i++) {
-			interpolatorsY[i].target(data.getTempsArr().get(i));
+			interpolatorsY.get(i).target(data.getTempsArr().get(i));
 		}
     	
     	
-        dataMin = PApplet.floor(Utils.getArrayListMin(data.getTempsArr()) / interval)* interval;
-        dataMax = PApplet.ceil(Utils.getArrayListMax(data.getTempsArr()) / interval)* interval;
+        dataMin = PApplet.floor(Utils.getArrayListMin(data.getTempsArr()) / yInterval)* yInterval;
+        dataMax = PApplet.ceil(Utils.getArrayListMax(data.getTempsArr()) / yInterval)* yInterval;
     }
     
+    public void setXInterval(int i){
+    	xInterval = i;
+    }
+    
+    public void setStartEnd(float start, float end){
+    	xStart = start;
+    	xEnd = end;
+    }
 }

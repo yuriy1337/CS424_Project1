@@ -15,6 +15,8 @@ public class RoomTemps extends PApplet {
 	LineGraph lg;
 	GUI buttons;
 	int zoomLevel = 0;
+	int linesAtZ1 = 0;
+	String currYear = "";
 	
 	HashMap<Integer, Line> cachedData;
 
@@ -23,11 +25,19 @@ public class RoomTemps extends PApplet {
 		smooth();
 		frameRate(30);
 
-		cachedData = new HashMap<Integer, Line>();
+		cachedData = new HashMap<Integer, Line>(50);
 		
 		buttons = new GUI(this);
-
+		
 		//ArrayList<ArrayList<Float>> arr = db.getAvg(DBConnector.AvgType.year);
+		/*DataContainer arr1 = db.getHourlyData(1);
+		DataContainer arr2 = db.getHourlyData(2);
+		DataContainer arr3 = db.getHourlyData(3);
+		DataContainer arr4 = db.getHourlyData(4);
+		DataContainer arr5 = db.getHourlyData(5);
+		DataContainer arr6 = db.getHourlyData(6);
+		DataContainer arr7 = db.getHourlyData(7);*/
+		//DataContainer arr1 = db.getAvgBySensor(DBConnector.AvgType.year, 1);
 		DataContainer arr1 = db.getAvgBySensor(DBConnector.AvgType.year, 1);
 		DataContainer arr2 = db.getAvgBySensor(
 				DBConnector.AvgType.year, 2);
@@ -41,8 +51,7 @@ public class RoomTemps extends PApplet {
 				DBConnector.AvgType.year, 6);
 		DataContainer arr7 = db.getAvgBySensor(
 				DBConnector.AvgType.year, 7);
-
-
+	
 		lg = new LineGraph(this);
 
 		// if I make an Image here it work, in GUI Class it doesn't
@@ -50,16 +59,16 @@ public class RoomTemps extends PApplet {
 		map.centerVertically();
 
 		// map.resize(320, 200, true);
-
-		lg.addLine(arr1, 1);
+		
+		cachedData.put(zoomLevel* 10 + 1, lg.addLine(arr1, 1));
 	
-		lg.addLine(arr2, 2);
-		lg.addLine(arr3, 3);
-		lg.addLine(arr4, 4);
-		lg.addLine(arr5, 5);
-		lg.addLine(arr6, 6);
-		lg.addLine(arr7, 7);
-	 	
+		cachedData.put(zoomLevel* 10 + 2, lg.addLine(arr2, 2));
+		cachedData.put(zoomLevel* 10 + 3, lg.addLine(arr3, 3));
+		cachedData.put(zoomLevel* 10 + 4, lg.addLine(arr4, 4));
+		cachedData.put(zoomLevel* 10 + 5, lg.addLine(arr5, 5));
+		cachedData.put(zoomLevel* 10 + 6, lg.addLine(arr6, 6));
+		cachedData.put(zoomLevel* 10 + 7, lg.addLine(arr7, 7));
+		
 	}
 
 	public void draw() {
@@ -89,6 +98,9 @@ public class RoomTemps extends PApplet {
 		else{
 			if(cachedData.containsKey(zoomLevel* 10 + theValue)){
 				lg.addLine(cachedData.get(zoomLevel* 10 + theValue).getData(), theValue, true);
+			}
+			else{
+				
 			}
 		}
 	}
@@ -127,8 +139,107 @@ public class RoomTemps extends PApplet {
 
 	
 	public void mouseClicked() {
-		// l.loadData();
+		if(lg.hasSelection()){
+			if(zoomLevel == 0){
+				zoomLevel++;
+				String s = lg.getSelectionStartYear();
+				currYear = s;
+				lg.removeAllLines();
+				ArrayList<DataContainer> arr = new ArrayList<DataContainer>();
+				arr.add(db.getAvgBySensorMonthRange(1,s,s));
+				arr.add(db.getAvgBySensorMonthRange(2,s,s));
+				arr.add(db.getAvgBySensorMonthRange(3,s,s));
+				arr.add(db.getAvgBySensorMonthRange(4,s,s));
+				arr.add(db.getAvgBySensorMonthRange(5,s,s));
+				arr.add(db.getAvgBySensorMonthRange(6,s,s));
+				arr.add(db.getAvgBySensorMonthRange(7,s,s));
+				
+				int i = 1;
+				for (DataContainer dataContainer : arr) {
+					if(buttons.isRoomSelected(i) == true){
+						Line l = lg.addLine(dataContainer, i);
+						cachedData.put(zoomLevel* 10 + i, l);
+					}
+					else{
+						lg.addLine(dataContainer, i);
+						Line l = lg.removeLine(i);
+						cachedData.put(zoomLevel* 10 + i, l);
+						
+					}
+					i++;
+					linesAtZ1++;
+				}
+			}else
+			if(zoomLevel == 1){
+				zoomLevel++;
+				String s = lg.getSelectionStartMonth();
+				lg.removeAllLines();
+				ArrayList<DataContainer> arr = new ArrayList<DataContainer>();
+				arr.add(db.getAvgBySensorDayRange(1,currYear,s,s));
+				arr.add(db.getAvgBySensorDayRange(2,currYear,s,s));
+				arr.add(db.getAvgBySensorDayRange(3,currYear,s,s));
+				arr.add(db.getAvgBySensorDayRange(4,currYear,s,s));
+				arr.add(db.getAvgBySensorDayRange(5,currYear,s,s));
+				arr.add(db.getAvgBySensorDayRange(6,currYear,s,s));
+				arr.add(db.getAvgBySensorDayRange(7,currYear,s,s));
+				
+				int i = 1;
+				for (DataContainer dataContainer : arr) {
+					if(buttons.isRoomSelected(i) == true){
+						Line l = lg.addLine(dataContainer, i);
+						cachedData.put(zoomLevel* 10 + i, l);
+					}
+					else{
+						lg.addLine(dataContainer, i);
+						Line l = lg.removeLine(i);
+						cachedData.put(zoomLevel* 10 + i, l);
+						
+					}
+					i++;
+					linesAtZ1++;
+				}
+			}
+			lg.loadLineData();
+			
+		}
+		lg.setZoomLevel(zoomLevel);
+		buttons.setZoomLevel(zoomLevel);
 	}
+	
+	public void next(int theValue) {
+		System.out.println("next");
+		for(int i=1;i<linesAtZ1+1;i++){
+			DataContainer dc = db.getAvgBySensorMonthOne(i, lg.getNextMonth(), lg.getNextMonthYear());
+			Line l = cachedData.get(zoomLevel* 10 + i);
+			l.loadData(dc);
+			break;
+		}
+			
+	}
+	
+	public void back(int theValue) {
+		roomClicked(theValue);
+	}
+	
+	public void viewTable(boolean val){
+		if(val)
+			lg.createTable();
+		else
+			lg.deleteTable();
+	}
+	
+	public void reset(int value){
+		zoomLevel = 0;
+		lg.removeAllLines();
+		lg.resetRowCount();
+		for(int i=1;i<8;i++){
+			if(buttons.isRoomSelected(i) == true){
+				Line l = cachedData.get(zoomLevel * 10 + i);
+				lg.addLine(l, i, false);
+			}
+		}
+	}
+	
 
 	public static void main(String args[]) {
 		RoomTempParser rm = new RoomTempParser();
